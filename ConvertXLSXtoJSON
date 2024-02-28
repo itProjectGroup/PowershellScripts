@@ -1,0 +1,38 @@
+# Load the ClosedXML assembly
+Add-Type -Path "Path to ClosedXML.dll"
+
+# Specify the path to the Excel file
+$excelFilePath = 'Path to .xlsx'
+
+# Open the workbook
+$workbook = New-Object ClosedXML.Excel.XLWorkbook($excelFilePath)
+
+# Get a worksheet by name
+$worksheetName = 'Sheet1'
+$worksheet = $workbook.Worksheet($worksheetName)
+
+# Check if the worksheet was found
+if ($worksheet -ne $null) {
+    Write-Output "Worksheet '$worksheetName' found!"
+
+    # Get all values in the worksheet
+    $allValues = $worksheet.RowsUsed().ForEach({
+        $rowValues = $_.Cells().ForEach({ $_.Value })
+        $rowData = @{}
+        for ($i = 0; $i -lt $rowValues.Count; $i++) {
+            $columnHeader = $worksheet.Cell(1, $i + 1).Value
+            $rowData[$columnHeader] = $rowValues[$i]
+        }
+        $rowData
+    })
+
+    # Convert values to JSON
+    $jsonResult = $allValues | ConvertTo-Json
+
+    # Print or use the JSON result
+    Write-Output $jsonResult
+}
+else {
+    Write-Output "Worksheet '$worksheetName' not found."
+}
+
