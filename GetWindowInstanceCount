@@ -1,0 +1,28 @@
+# Load required assemblies
+Add-Type -AssemblyName @('UIAutomationClient', 'UIAutomationTypes')
+
+# Get the root automation element
+$root = [Windows.Automation.AutomationElement]::RootElement
+
+# Find all child elements under the root
+$windows = $root.FindAll([Windows.Automation.TreeScope]::Children, [Windows.Automation.Condition]::TrueCondition)
+
+# Specify the process name to check
+$targetProcessName = "chrome"
+
+# Initialize the counter
+$count = 0
+
+# Iterate through each window
+foreach ($window in $windows) {
+    # Get the process associated with the window
+    $process = Get-Process | Where-Object { $_.Id -eq $window.Current.ProcessId }
+
+    # Check if the process name matches the target process
+    if ($process.ProcessName -eq $targetProcessName) {
+        $count++
+    }
+}
+
+# Output the count of windows with the specified process name
+Write-Output "Number of windows with process '$targetProcessName': $count"
